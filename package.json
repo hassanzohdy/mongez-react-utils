@@ -1,0 +1,21 @@
+{
+  "name": "@mongez/react-utils",
+  "version": "1.0.1",
+  "description": "Some Good utilities for React",
+  "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hassanzohdy/react-utils"
+  },
+  "keywords": [
+    "react",
+    "react-utils",
+    "map-elements"
+  ],
+  "peerDependencies": {
+    "axios": "^0.x.x",
+    "react": ">=16.x.x"
+  },
+  "author": "hassanzohdy",
+  "license": "MIT"
+}
