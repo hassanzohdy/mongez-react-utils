@@ -44,10 +44,12 @@ export default function preload(
               finalResponses.push(response);
             }
 
+            preloadConfigurations.onSuccess?.(finalResponses);
             setResponse(finalResponses);
             loading(false);
           },
           (error) => {
+            preloadConfigurations.onError?.(error);
             setError(error);
             loading(false);
           }
@@ -56,10 +58,12 @@ export default function preload(
         request(props)
           .then(async (response) => {
             response = await prepareResponse(response);
+            preloadConfigurations.onSuccess?.(response);
             setResponse(response);
             loading(false);
           })
           .catch((error) => {
+            preloadConfigurations.onError?.(error);
             setError(error);
             loading(false);
           });
@@ -67,12 +71,12 @@ export default function preload(
     }, [request]);
 
     if (isLoading || error) {
-      return (
+      return configurations.loadingErrorComponent ? (
         <configurations.loadingErrorComponent
           isLoading={isLoading}
           error={error}
         />
-      );
+      ) : null;
     }
 
     return (

@@ -299,6 +299,10 @@ export default preload(Profile, fetch('/api/user'));
 
 You will receive `isLoading` flag to tell you if the request is being loaded, and `error` object if the request failed.
 
+> If loadingErrorComponent is not defined, then null will be returned during loading or on error occurs
+
+### Multiple Requests
+
 You can also send multiple requests to be loaded before rendering the component.
 
 ```tsx
@@ -325,6 +329,39 @@ export default preload(Profile, [
 Requests will be loaded
 
 This will load both requests simultaneously before rendering the component, and the data will be passed as an `array` to the component.
+
+## Listen for success or error
+
+You can listen for success or error of the request by passing the `onSuccess` or `onError` callbacks to the `preload` function.
+
+```tsx
+import { preload } from '@mongez/react-utils';
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {data.name}</div>
+      <div>Email: {data.email}</div>
+    </div>
+  )
+}
+
+export default preload(Profile, () => fetch('/api/user'), {
+  onSuccess: (response) => {
+    // do something
+  },
+  onError: (error) => {
+    // do something
+  }
+});
+```
+
+If the request (2nd argument) is an array of requests, then the `onSuccess` will receive an array of responses, and the `onError` will receive an array of errors.
+
+> These can defined in the `setPreloadConfiguration` function as well.
+
+> If defined in both preload function and `setPreloadConfiguration` function, the one defined in the `preload` function will be used.
 
 ### Dependant Requests
 

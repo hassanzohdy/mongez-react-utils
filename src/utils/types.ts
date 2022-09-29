@@ -5,4 +5,6 @@ export type PreloadRequest = (props: any) => Promise<any>;
 export type PreloadConfigurations = {
   loadingErrorComponent?: React.ComponentType;
   componentProps?: any;
+  onError?: (responseError: any) => void;
+  onSuccess?: (response: any) => void;
 };
