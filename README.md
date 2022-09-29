@@ -1,4 +1,4 @@
-# React Utils
+b# React Utils
 
 Some good utilities to use in your React Js/ React Native Apps
 
@@ -165,12 +165,57 @@ export default function TableInputs({data}: any) {
     setRows(rows.filter((row: any, i: number) => i !== index));
   }
 
+  const addRow = () => {
+    setRows(uniqueKeys([...rows, {
+      name: ''
+    }]));
+  }
+
   return (
     <table>
       <tbody>
         {rows.map((row, index) => (
           <tr key={row.uniqueId}>
+          <td>
             <input name="name[]" placeholder="Name" />
+          </td>
+          <td>
+          </td>
+            <button type="button" onClick={deleteRow}>Delete</button>
+          </tr>
+        ))}
+        <tr>
+          <td colSpan={2}>
+            <button type="button" onClick={addRow}>Add</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  )
+```
+
+The `uniqueId` key is generated automatically and it's unique for each object in the array, so you can use it as the key for the element, if the `uniqueId` already exists, then it will be used instead of generating new one.
+
+To see the difference between using `uniqueId` and the index, try to delete the first row, you'll notice that the second row will be deleted instead of the first one.
+
+If the array is a list of non-objects, then each element will be wrapped with an object with the key `value` and the value will be the element itself.
+
+```tsx
+import { uniqueKeys } from '@mongez/react-utils';
+
+export default function TableInputs({data}: any) {
+  const [rows, setRows] = useState(uniqueKeys([1, 2, 3, 4]));
+
+  const deleteRow = (index: number) => {
+    setRows(rows.filter((row: any, i: number) => i !== index));
+  }
+
+  return (
+    <table>
+      <tbody>
+        {rows.map((row, index) => (
+          <tr key={row.uniqueId}>
+            <input name="name[]" placeholder="Name" value={row.value} />
 
             <button type="button" onClick={deleteRow}>Delete</button>
           </tr>
@@ -179,10 +224,6 @@ export default function TableInputs({data}: any) {
     </table>
   )
 ```
-
-To see the difference between using `uniqueId` and the index, try to delete the first row, you'll notice that the second row will be deleted instead of the first one.
-
-If the array is a list of non-objects, then each element will be wrapped with an object with the key `value` and the value will be the element itself.
 
 ## Preload
 
