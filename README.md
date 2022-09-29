@@ -153,7 +153,7 @@ Of course this function will add a unique `key` automatically so you don't have 
 
 > Added in V1.1.0
 
-Generating keys for the elements in the array is a good practice, but it's not always easy to do it specially if you're dealing with inputs inside the array, luckily, `uniqueKeys` utility will generate for each object.
+Generating keys for the elements in the array is a good practice, but it's not always easy to do it specially if you're dealing with inputs inside the array, luckily, `uniqueKeys` utility will generate a unique id for each object.
 
 ```tsx
 import { uniqueKeys } from '@mongez/react-utils';
