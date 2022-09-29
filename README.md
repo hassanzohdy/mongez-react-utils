@@ -367,10 +367,10 @@ If the request (2nd argument) is an array of requests, then the `onSuccess` will
 
 > Added in V1.1.0
 
-Sometimes there are requests that depend on each other, for example, you want to fetch the user data first, then fetch the user's posts, this is where `dependantRequests` comes in handy.
+Sometimes there are requests that depend on each other, for example, you want to fetch the user data first, then fetch the user's posts, this is where `pipeline` comes in handy.
 
 ```tsx
-import { preload, dependantRequests } from '@mongez/react-utils';
+import { preload, pipeline } from '@mongez/react-utils';
 
 function Profile({ response }) {
   return (
@@ -382,7 +382,7 @@ function Profile({ response }) {
   )
 }
 
-export default preload(Profile, dependantRequests([
+export default preload(Profile, pipeline([
   (props) => fetch('/api/user'),
   (props, userResponse, responsesList) => fetch('/api/posts?userId=' + userResponse.data.id),
 ]));

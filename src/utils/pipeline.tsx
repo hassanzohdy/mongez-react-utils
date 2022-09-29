@@ -3,7 +3,7 @@ import { prepareResponse, usingFetchApi } from "./utils";
 /**
  * Load the given array of requests that depend on each other.
  */
-export default function dependantRequests(
+export default function pipeline(
   requests: ((
     props: any,
     previousResponse: any,
