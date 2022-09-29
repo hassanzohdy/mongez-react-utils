@@ -1,5 +1,8 @@
 import React from "react";
 
+export type PreloadRequest = (props: any) => Promise<any>;
+
 export type PreloadConfigurations = {
-  loadingErrorHandler?: React.ComponentType;
+  loadingErrorComponent?: React.ComponentType;
+  componentProps?: any;
 };

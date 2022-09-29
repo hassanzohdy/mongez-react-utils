@@ -1,8 +1,6 @@
-import { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
-import { PreloadConfigurations } from "./types";
-
-export type PreloadRequest = (props: any) => Promise<AxiosResponse>;
+import { PreloadConfigurations, PreloadRequest } from "./types";
+import { prepareResponse } from "./utils";
 
 let preloadConfigurations: PreloadConfigurations = {};
 
@@ -21,17 +19,14 @@ export function setPreloadConfiguration(
  * the response of the request is sent to the given component alongside with the passed props.
  */
 export default function preload(
-  Component: React.ComponentType,
+  Component: React.ComponentType<any>,
   request: PreloadRequest | PreloadRequest[],
-  morePropsToPass: any = {},
-  preloadConfig: Partial<PreloadConfigurations> = {}
+  preloadConfig: PreloadConfigurations = {}
 ): React.FC<any> {
   let configurations: PreloadConfigurations = {
     ...preloadConfigurations,
     ...preloadConfig,
   };
-
-  const LoadingErrorHandler = configurations.loadingErrorHandler;
 
   return function LoadComponent(props: any) {
     const [isLoading, loading] = useState(true);
@@ -41,8 +36,15 @@ export default function preload(
     useEffect(() => {
       if (Array.isArray(request)) {
         Promise.all(request.map((data) => data(props))).then(
-          (responses) => {
-            setResponse(responses);
+          async (responses) => {
+            let finalResponses: any[] = [];
+            for (let response of responses) {
+              response = await prepareResponse(response);
+
+              finalResponses.push(response);
+            }
+
+            setResponse(finalResponses);
             loading(false);
           },
           (error) => {
@@ -52,7 +54,8 @@ export default function preload(
         );
       } else {
         request(props)
-          .then((response) => {
+          .then(async (response) => {
+            response = await prepareResponse(response);
             setResponse(response);
             loading(false);
           })
@@ -64,9 +67,20 @@ export default function preload(
     }, [request]);
 
     if (isLoading || error) {
-      return <LoadingErrorHandler isLoading={isLoading} error={error} />;
+      return (
+        <configurations.loadingErrorComponent
+          isLoading={isLoading}
+          error={error}
+        />
+      );
     }
 
-    return <Component {...props} {...morePropsToPass} response={response} />;
+    return (
+      <Component
+        {...props}
+        {...(configurations.componentProps || {})}
+        response={response}
+      />
+    );
   };
 }
