@@ -1,4 +1,4 @@
-import { prepareResponse, usingFetchApi } from "./utils";
+import { prepareResponse } from "./utils";
 
 /**
  * Load the given array of requests that depend on each other.
@@ -22,14 +22,12 @@ export default function pipeline(
             responses
           );
 
-          responses.push(
-            usingFetchApi(response) ? await prepareResponse(response) : response
-          );
+          responses.push(await prepareResponse(response));
         }
 
         resolve(responses);
       } catch (error) {
-        reject(error);
+        reject(error, responses);
       }
     });
   };
