@@ -196,7 +196,7 @@ export default function TableInputs({data}: any) {
 
 The `uniqueId` key is generated automatically and it's unique for each object in the array, so you can use it as the key for the element, if the `uniqueId` already exists, then it will be used instead of generating new one.
 
-To see the difference between using `uniqueId` and the index, try to delete the first row, you'll notice that the second row will be deleted instead of the first one.
+To see the difference between using `uniqueId` and the index, use the `index` instead of the `uniqueId` as key for the `tr` tag then try to delete the first row, you'll notice that the second row will be deleted instead of the first one.
 
 If the array is a list of non-objects, then each element will be wrapped with an object with the key `value` and the value will be the element itself.
 
