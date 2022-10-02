@@ -1,6 +1,6 @@
 {
     "name": "@mongez/react-utils",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "Some Good utilities for React",
     "main": "src/index.ts",
     "repository": {
