@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { PreloadConfigurations, PreloadRequest } from "./types";
 import { prepareResponse } from "./utils";
 
-let preloadConfigurations: PreloadConfigurations = {};
+let preloadConfigurations: PreloadConfigurations = {
+  cache: true,
+};
+
+const caches: Record<string, any> = {};
 
 /**
  * Set preloader configurations
@@ -29,9 +33,21 @@ export default function preload(
   };
 
   return function LoadComponent(props: any) {
-    const [isLoading, loading] = useState(true);
+    const [isLoading, loading] = useState(() =>
+      configurations.cache ? Boolean(caches[request.toString()]) : true
+    );
     const [error, setError] = useState<any | null>(null);
-    const [response, setResponse] = useState<any | any[]>(null);
+    const [response, setResponse] = useState<any | any[]>(() =>
+      configurations.cache ? caches[request.toString()] : null
+    );
+
+    const updateResponse = (response: any) => {
+      setResponse(response);
+      loading(false);
+      if (configurations.cache) {
+        caches[request.toString()] = response;
+      }
+    };
 
     useEffect(() => {
       if (Array.isArray(request)) {
@@ -45,8 +61,7 @@ export default function preload(
             }
 
             preloadConfigurations.onSuccess?.(finalResponses);
-            setResponse(finalResponses);
-            loading(false);
+            updateResponse(finalResponses);
           },
           (error) => {
             preloadConfigurations.onError?.(error);
@@ -59,8 +74,7 @@ export default function preload(
           .then(async (response) => {
             response = await prepareResponse(response);
             preloadConfigurations.onSuccess?.(response);
-            setResponse(response);
-            loading(false);
+            updateResponse(response);
           })
           .catch((error) => {
             preloadConfigurations.onError?.(error);

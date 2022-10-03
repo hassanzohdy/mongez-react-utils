@@ -16,7 +16,7 @@ Or
 
 Loop over the given array and render the given component for each element in the array.
 
-`mapElements( data: any[], Component: React.ElementType, as: string | ((item: any, index: number) => object) = "item"): React.ReactNode`
+`mapElements( data[], Component: React.ElementType, as: string | ((item, index: number) => object) = "item"): React.ReactNode`
 
 Before:
 
@@ -43,14 +43,14 @@ function LatestPosts() {
   return (
     <>
       <h3>Latest Posts</h3>
-      {posts.map((post: any) => (
+      {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
     </PostCard>
   )
 }
 
-function PostCard({ post }: any) {
+function PostCard({ post }) {
   return (
     <div>
         <div className="title">{post.title}</div>
@@ -63,7 +63,7 @@ function PostCard({ post }: any) {
 After:
 
 ```tsx
-import { mapElements } from '@mongez/react-';
+import { mapElements } from '@mongez/react-utils';
 
 const posts = [
   {
@@ -92,7 +92,7 @@ function LatestPosts() {
   )
 }
 
-function PostCard({ post }: any) {
+function PostCard({ post }) {
   return (
     <div>
         <div className="title">{post.title}</div>
@@ -105,7 +105,7 @@ function PostCard({ post }: any) {
 You can also decide what to be passed to the component
 
 ```tsx
-import { mapElements } from '@mongez/react-';
+import { mapElements } from '@mongez/react-utils';
 
 const posts = [
   {
@@ -137,7 +137,7 @@ function LatestPosts() {
   )
 }
 
-function PostCard({ title, image }: any) {
+function PostCard({ title, image }) {
   return (
     <div>
         <div className="title">{title}</div>
@@ -158,11 +158,11 @@ Generating keys for the elements in the array is a good practice, but it's not a
 ```tsx
 import { uniqueKeys } from '@mongez/react-utils';
 
-export default function TableInputs({data}: any) {
+export default function TableInputs({data}) {
   const [rows, setRows] = useState(uniqueKeys(data));
 
   const deleteRow = (index: number) => {
-    setRows(rows.filter((row: any, i: number) => i !== index));
+    setRows(rows.filter((row, i: number) => i !== index));
   }
 
   const addRow = () => {
@@ -203,11 +203,11 @@ If the array is a list of non-objects, then each element will be wrapped with an
 ```tsx
 import { uniqueKeys } from '@mongez/react-utils';
 
-export default function TableInputs({data}: any) {
+export default function TableInputs({data}) {
   const [rows, setRows] = useState(uniqueKeys([1, 2, 3, 4]));
 
   const deleteRow = (index: number) => {
-    setRows(rows.filter((row: any, i: number) => i !== index));
+    setRows(rows.filter((row, i: number) => i !== index));
   }
 
   return (
@@ -239,8 +239,8 @@ function Profile({ response }) {
   return (
     <div>
       <h1>Profile</h1>
-      <div>Name: {data.name}</div>
-      <div>Email: {data.email}</div>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
     </div>
   )
 }
@@ -263,8 +263,8 @@ function Profile({ response }) {
   return (
     <div>
       <h1>Profile</h1>
-      <div>Name: {data.name}</div>
-      <div>Email: {data.email}</div>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
     </div>
   )
 }
@@ -288,8 +288,8 @@ function Profile({ response }) {
   return (
     <div>
       <h1>Profile</h1>
-      <div>Name: {data.name}</div>
-      <div>Email: {data.email}</div>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
     </div>
   )
 }
@@ -330,6 +330,33 @@ Requests will be loaded
 
 This will load both requests simultaneously before rendering the component, and the data will be passed as an `array` to the component.
 
+### Dependant Requests
+
+> Added in V1.1.0
+
+Sometimes there are requests that depend on each other, for example, you want to fetch the user data first, then fetch the user's posts, this is where `pipeline` comes in handy.
+
+```tsx
+import { preload, pipeline } from '@mongez/react-utils';
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
+    </div>
+  )
+}
+
+export default preload(Profile, pipeline([
+  (props) => fetch('/api/user'),
+  (props, userResponse, responsesList) => fetch('/api/posts?userId=' + userResponse.data.id),
+]));
+```
+
+This will load the first request, then the second request, and then the third request, each request will receive the component props besides the previous responses, by receiving `responses` or if you want only to receive the previous response of the current request, you may receive `response` property, finally the data will be passed as an `array` from all requests to the component.
+
 ## Listen for success or error
 
 You can listen for success or error of the request by passing the `onSuccess` or `onError` callbacks to the `preload` function.
@@ -341,8 +368,8 @@ function Profile({ response }) {
   return (
     <div>
       <h1>Profile</h1>
-      <div>Name: {data.name}</div>
-      <div>Email: {data.email}</div>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
     </div>
   )
 }
@@ -363,29 +390,54 @@ If the request (2nd argument) is an array of requests, then the `onSuccess` will
 
 > If defined in both preload function and `setPreloadConfiguration` function, the one defined in the `preload` function will be used.
 
-### Dependant Requests
+### Caching
 
-> Added in V1.1.0
+> Added in V1.2.0
 
-Sometimes there are requests that depend on each other, for example, you want to fetch the user data first, then fetch the user's posts, this is where `pipeline` comes in handy.
+You can cache the request response by passing the `cache` option to the `preload` function, which defaults to `true`.
 
 ```tsx
-import { preload, pipeline } from '@mongez/react-utils';
+import { preload } from '@mongez/react-utils';
 
 function Profile({ response }) {
   return (
     <div>
       <h1>Profile</h1>
-      <div>Name: {data.name}</div>
-      <div>Email: {data.email}</div>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
     </div>
   )
 }
 
-export default preload(Profile, pipeline([
-  (props) => fetch('/api/user'),
-  (props, userResponse, responsesList) => fetch('/api/posts?userId=' + userResponse.data.id),
-]));
+export default preload(Profile, () => fetch('/api/user'), {
+  cache: true
+});
 ```
 
-This will load the first request, then the second request, and then the third request, each request will receive the component props besides the previous responses, by receiving `responses` or if you want only to receive the previous response of the current request, you may receive `response` property, finally the data will be passed as an `array` from all requests to the component.
+Now whenever the component is rendered, the request will be loaded only once, and the response will be cached, and the next time the component is rendered, the cached response will be used.
+
+This will enhance the performance significantly, and it will be useful when you have a component that is rendered multiple times, for example, a list of items, and each item has a request to be loaded.
+
+The cache key is the signature of the request call, so if any parameter is changed it will generate a new cache and send a new request.
+
+You can also set default cache option using `setPreloadConfiguration` function.
+
+```tsx
+import { preload, setPreloadConfiguration } from '@mongez/react-utils';
+
+setPreloadConfiguration({
+  cache: true
+});
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
+    </div>
+  )
+}
+
+export default preload(Profile, () => fetch('/api/user'));
+```
