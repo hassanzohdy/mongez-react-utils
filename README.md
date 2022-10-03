@@ -392,7 +392,7 @@ If the request (2nd argument) is an array of requests, then the `onSuccess` will
 
 ### Caching
 
-> Added in V1.2.0
+> Added in V1.3.0
 
 You can cache the request response by passing the `cache` option to the `preload` function, which defaults to `true`.
 
