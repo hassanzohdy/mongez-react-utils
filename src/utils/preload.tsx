@@ -32,15 +32,17 @@ export default function preload(
     ...preloadConfig,
   };
 
+  const requestCacheKey = request.toString();
+
   return function LoadComponent(props: any) {
     const [isLoading, loading] = useState(() =>
-      configurations.cache ? !Boolean(caches[request.toString()]) : true
+      configurations.cache ? !Boolean(caches[requestCacheKey]) : true
     );
 
     const [error, setError] = useState<any | null>(null);
     const [response, setResponse] = useState<any | any[]>(() =>
-      configurations.cache && caches[request.toString()]
-        ? caches[request.toString()]
+      configurations.cache && caches[requestCacheKey]
+        ? caches[requestCacheKey]
         : null
     );
 
@@ -48,12 +50,13 @@ export default function preload(
       setResponse(response);
       loading(false);
       if (configurations.cache) {
-        caches[request.toString()] = response;
-        console.log(caches[request.toString()]);
+        caches[requestCacheKey] = response;
       }
     };
 
     useEffect(() => {
+      if (configurations.cache && caches[requestCacheKey]) return;
+
       if (Array.isArray(request)) {
         Promise.all(request.map((data) => data(props))).then(
           async (responses) => {
