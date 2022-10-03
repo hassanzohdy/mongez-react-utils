@@ -2,11 +2,16 @@ import React from "react";
 
 export type PreloadRequest = (props: any) => Promise<any>;
 
+export type LoadingErrorComponentProps = {
+  isLoading: boolean;
+  error: any;
+};
+
 export type PreloadConfigurations = {
   /**
    * Define the component to be rendered while the data is being fetched or when error occurs.
    */
-  loadingErrorComponent?: React.ComponentType;
+  loadingErrorComponent?: React.ComponentType<LoadingErrorComponentProps>;
   /**
    * Pass more component props
    */

@@ -34,11 +34,14 @@ export default function preload(
 
   return function LoadComponent(props: any) {
     const [isLoading, loading] = useState(() =>
-      configurations.cache ? Boolean(caches[request.toString()]) : true
+      configurations.cache ? !Boolean(caches[request.toString()]) : true
     );
+
     const [error, setError] = useState<any | null>(null);
     const [response, setResponse] = useState<any | any[]>(() =>
-      configurations.cache ? caches[request.toString()] : null
+      configurations.cache && caches[request.toString()]
+        ? caches[request.toString()]
+        : null
     );
 
     const updateResponse = (response: any) => {
@@ -46,6 +49,7 @@ export default function preload(
       loading(false);
       if (configurations.cache) {
         caches[request.toString()] = response;
+        console.log(caches[request.toString()]);
       }
     };
 
@@ -82,14 +86,13 @@ export default function preload(
             loading(false);
           });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [request]);
 
     if (isLoading || error) {
-      return configurations.loadingErrorComponent ? (
-        <configurations.loadingErrorComponent
-          isLoading={isLoading}
-          error={error}
-        />
+      const Component = configurations.loadingErrorComponent;
+      return Component ? (
+        <Component isLoading={isLoading} error={error} />
       ) : null;
     }
 
