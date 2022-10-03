@@ -27,7 +27,7 @@ export default function pipeline(
 
         resolve(responses);
       } catch (error) {
-        reject(error, responses);
+        reject(error);
       }
     });
   };
