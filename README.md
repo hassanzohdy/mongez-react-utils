@@ -441,3 +441,26 @@ function Profile({ response }) {
 
 export default preload(Profile, () => fetch('/api/user'));
 ```
+
+## Guarded
+
+> Added in V1.3.0
+
+The `guarded` function is used to guard the component from being rendered if the given condition is not met.
+
+```tsx
+import { guarded } from '@mongez/react-utils';
+import user from 'somewhere';
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
+    </div>
+  )
+}
+
+export default guarded(Profile, () => user.isLoggedIn());
+```
