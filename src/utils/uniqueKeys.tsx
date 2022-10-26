@@ -10,7 +10,7 @@ export default function uniqueKeys(array: any[]) {
 
     return {
       ...object,
-      uniqueId: Math.random().toString(36).substring(2, 15),
+      uniqueId: object.uniqueId || Math.random().toString(36).substring(2, 15),
     };
   });
 }
