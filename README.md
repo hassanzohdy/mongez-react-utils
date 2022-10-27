@@ -225,6 +225,33 @@ export default function TableInputs({data}) {
   )
 ```
 
+You can also assign a different key name instead of `uniqueId` by passing it as the second argument.
+
+```tsx
+import { uniqueKeys } from '@mongez/react-utils';
+
+export default function TableInputs({data}) {
+  const [rows, setRows] = useState(uniqueKeys([1, 2, 3, 4], 'id'));
+
+  const deleteRow = (index: number) => {
+    setRows(rows.filter((row, i: number) => i !== index));
+  }
+
+  return (
+    <table>
+      <tbody>
+        {rows.map((row, index) => (
+          <tr key={row.id}>
+            <input name="name[]" placeholder="Name" value={row.value} />
+
+            <button type="button" onClick={deleteRow}>Delete</button>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+```
+
 ## Preload
 
 Sometimes you need to preload some data before rendering the component, for example, you want to fetch the user data before rendering the profile page, or you want to fetch the list of categories before rendering the posts page, this is where `preload` utility comes in handy.
