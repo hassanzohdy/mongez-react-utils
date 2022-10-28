@@ -3,7 +3,11 @@ import { PreloadConfigurations, PreloadRequest } from "./types";
 import { prepareResponse } from "./utils";
 
 let preloadConfigurations: PreloadConfigurations = {
-  cache: true,
+  cache: {
+    key: "",
+    expiresAfter: 5 * 60, // 5 minutes
+  },
+  componentProps: {},
 };
 
 const caches: Record<string, any> = {};
@@ -32,30 +36,83 @@ export default function preload(
     ...preloadConfig,
   };
 
-  const requestCacheKey = request.toString();
+  if (preloadConfig.cache) {
+    configurations.cache = {
+      ...preloadConfigurations.cache,
+      ...preloadConfig.cache,
+    };
+  } else {
+    delete configurations.cache;
+  }
+
+  const requestText = request.toString();
+
+  const getCacheKey = (props) => {
+    if (!configurations.cache) return "";
+
+    const cacheKey = configurations.cache.key;
+
+    if (!cacheKey) return requestText;
+
+    return (
+      (typeof cacheKey === "string" ? cacheKey : cacheKey(props)) + requestText
+    );
+  };
+
+  const getCache = (cacheKey) => {
+    if (
+      configurations.cache === false ||
+      configurations.cache?.expiresAfter === 0
+    )
+      return null;
+
+    const requestCache = caches[cacheKey];
+
+    if (!requestCache) return;
+
+    const { expiresAfter, response } = requestCache;
+
+    if (expiresAfter && Date.now() > expiresAfter) {
+      delete caches[cacheKey];
+      return;
+    }
+
+    return response;
+  };
+
+  const cacheResponse = (cacheKey, response) => {
+    const cache = configurations.cache;
+
+    if (!cache) return;
+
+    caches[cacheKey] = {
+      response,
+      expiresAt: new Date().getTime() + (cache.expiresAfter || 0) * 1000,
+    };
+  };
 
   return function LoadComponent(props: any) {
-    const [isLoading, loading] = useState(() =>
-      configurations.cache ? !Boolean(caches[requestCacheKey]) : true
-    );
+    const [requestCacheKey, responseCache] = React.useMemo(() => {
+      const requestCacheKey = getCacheKey(props);
+      const responseCache = getCache(requestCacheKey);
+
+      return [requestCacheKey, responseCache];
+    }, [props]);
+
+    const [isLoading, loading] = useState(!Boolean(responseCache));
 
     const [error, setError] = useState<any | null>(null);
-    const [response, setResponse] = useState<any | any[]>(() =>
-      configurations.cache && caches[requestCacheKey]
-        ? caches[requestCacheKey]
-        : null
-    );
+    const [response, setResponse] = useState<any | any[]>(responseCache);
 
     const updateResponse = (response: any) => {
       setResponse(response);
       loading(false);
-      if (configurations.cache) {
-        caches[requestCacheKey] = response;
-      }
+
+      cacheResponse(requestCacheKey, response);
     };
 
     useEffect(() => {
-      if (configurations.cache && caches[requestCacheKey]) return;
+      if (responseCache) return;
 
       if (Array.isArray(request)) {
         Promise.all(request.map((data) => data(props))).then(
@@ -67,11 +124,11 @@ export default function preload(
               finalResponses.push(response);
             }
 
-            preloadConfigurations.onSuccess?.(finalResponses);
+            configurations.onSuccess?.(finalResponses);
             updateResponse(finalResponses);
           },
           (error) => {
-            preloadConfigurations.onError?.(error);
+            configurations.onError?.(error);
             setError(error);
             loading(false);
           }
@@ -80,11 +137,11 @@ export default function preload(
         request(props)
           .then(async (response) => {
             response = await prepareResponse(response);
-            preloadConfigurations.onSuccess?.(response);
+            configurations.onSuccess?.(response);
             updateResponse(response);
           })
           .catch((error) => {
-            preloadConfigurations.onError?.(error);
+            configurations.onError?.(error);
             setError(error);
             loading(false);
           });
@@ -102,7 +159,7 @@ export default function preload(
     return (
       <Component
         {...props}
-        {...(configurations.componentProps || {})}
+        {...configurations.componentProps}
         response={response}
       />
     );

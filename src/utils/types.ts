@@ -21,7 +21,19 @@ export type PreloadConfigurations = {
    *
    * @default true
    */
-  cache?: boolean;
+  cache?:
+    | false
+    | {
+        /**
+         * Cache key
+         */
+        key?: string | ((props: any) => string);
+        /**
+         * Expires after in seconds
+         * @default 0
+         */
+        expiresAfter?: number;
+      };
   /**
    * Triggered when the request has an error.
    */

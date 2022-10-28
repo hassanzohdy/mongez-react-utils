@@ -384,6 +384,70 @@ export default preload(Profile, pipeline([
 
 This will load the first request, then the second request, and then the third request, each request will receive the component props besides the previous responses, by receiving `responses` or if you want only to receive the previous response of the current request, you may receive `response` property, finally the data will be passed as an `array` from all requests to the component.
 
+## Response Cache
+
+Now you can cache the response of a request, so if the request is already cached, it will be returned from the cache instead of sending the request again.
+
+```tsx
+import { preload } from '@mongez/react-utils';
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
+    </div>
+  )
+}
+
+export default preload(Profile, () => fetch('/api/user'), {
+  cache: {
+    key: 'user',
+    expiresAfter: 60 * 5, // 5 minutes
+  }
+});
+```
+
+Now when the user hits this page, the request will be sent, and the response will be cached, so if the user hits this page again, the request will not be sent, and the response will be returned from the cache.
+
+You can also customize the cache key as it can receive the component props to determine which key to use.
+
+```tsx
+import { preload } from '@mongez/react-utils';
+
+function ViewUser({ response }) {
+  const user = response.data.user;
+
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {user.name}</div>
+      <div>Email: {user.email}</div>
+    </div>
+  )
+}
+
+export default preload(ViewUser, (props) => fetch('/api/user/' + props.id), {
+  cache: {
+    key: ( {params} ) => 'user-' + params.id,
+    expiresAfter: 60 * 5, // 5 minutes
+  }
+});
+```
+
+You can also set the default expire time using `setPreloadConfiguration` function.
+
+```tsx
+import { preload, setPreloadConfiguration } from '@mongez/react-utils';
+
+setPreloadConfiguration({
+  cache: {
+    expiresAfter: 60 * 5, // 5 minutes
+  }
+});
+```
+
 ## Listen for success or error
 
 You can listen for success or error of the request by passing the `onSuccess` or `onError` callbacks to the `preload` function.
