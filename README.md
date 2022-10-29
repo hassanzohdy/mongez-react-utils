@@ -557,3 +557,26 @@ export default guarded(Profile, () => user.isLoggedIn());
 ```
 
 If the output of the callback is `true`, then the component will be rendered, otherwise the returned value of the callback will be returned instead.
+
+```tsx
+import { guarded } from '@mongez/react-utils';
+import user from 'somewhere';
+
+function Profile({ response }) {
+  return (
+    <div>
+      <h1>Profile</h1>
+      <div>Name: {response.data.name}</div>
+      <div>Email: {response.data.email}</div>
+    </div>
+  )
+}
+
+export default guarded(Profile, () => {
+  if (!user.isLoggedIn()) {
+    return <Redirect to="/login" />
+  }
+
+  return true;
+});
+```
