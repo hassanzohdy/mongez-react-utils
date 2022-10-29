@@ -555,3 +555,5 @@ function Profile({ response }) {
 
 export default guarded(Profile, () => user.isLoggedIn());
 ```
+
+If the output of the callback is `true`, then the component will be rendered, otherwise the returned value of the callback will be returned instead.

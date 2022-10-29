@@ -8,8 +8,10 @@ export default function guarded(
   guard: (props: any) => boolean
 ) {
   return function Guarded(props: any) {
-    if (guard(props) === false) {
-      return null;
+    const output = guard(props);
+
+    if (output !== true) {
+      return output;
     }
 
     return <Component {...props} />;
