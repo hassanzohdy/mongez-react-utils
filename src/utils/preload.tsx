@@ -36,15 +36,6 @@ export default function preload(
     ...preloadConfig,
   };
 
-  if (preloadConfig.cache) {
-    configurations.cache = {
-      ...preloadConfigurations.cache,
-      ...preloadConfig.cache,
-    };
-  } else {
-    delete configurations.cache;
-  }
-
   const requestText = request.toString();
 
   const getCacheKey = (props) => {
