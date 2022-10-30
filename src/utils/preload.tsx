@@ -21,6 +21,10 @@ export function setPreloadConfiguration(
   preloadConfigurations = { ...preloadConfigurations, ...config };
 }
 
+export function getPreloadConfigurations() {
+  return preloadConfigurations;
+}
+
 /**
  * Load the given request(s) then render the given component once the response is loaded.
  * This utility accept single request or an array of requests.
